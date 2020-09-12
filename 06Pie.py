@@ -3,21 +3,22 @@
 >>> a = a.remove(Remove(), Integer(3))
 >>> whatPie(a)
 Top/Bot/
-
 >>> b = Top(Integer(3), Top(Integer(2), Top(Integer(3), Bot())))
 >>> b = b.substitute(Substitute(), Integer(5), Integer(3))
 >>> whatPie(b)
 Top/Top/Top/Bot/
 >>> b.obj.value
 5
-
 >>> c = Top(Integer(3), Top(Integer(2), Top(Integer(3), Bot())))
 >>> c = c.substitute2(Substitute2(Integer(5), Integer(3)))
 >>> whatPie(c)
 Top/Top/Top/Bot/
 >>> c.obj.value
 5
+>>> d = Top(Anchovy(), Top(Tuna(), Top(Anchovy(), Top(Tuna(), Top(Anchovy(), Bot())))))
+>>> d = d.accept(LimitedSubstitutionVisitor(2,  Salmon(),  Anchovy()))
 """
+
 
 from abc import ABC, abstractmethod
 
@@ -61,11 +62,11 @@ class Substitute2(object):
 
 class PieVisitor(ABC):
     @abstractmethod
-    def forBot() -> "Pie":
+    def forBot(self) -> "Pie":
         pass
 
     @abstractmethod
-    def forTop(obj: object, pie: "Pie") -> "Pie":
+    def forTop(self, obj: object, pie: "Pie") -> "Pie":
         pass
 
 
@@ -73,7 +74,7 @@ class RemoveVisitor(PieVisitor):
     def __init__(self, target: object):
         self.target = target
 
-    def forBot() -> "Pie":
+    def forBot(self) -> "Pie":
         return Bot()
 
     def forTop(self, obj: object, pie: "Pie") -> "Pie":
@@ -95,7 +96,25 @@ class SubstituteVisitor(PieVisitor):
         if obj.equals(self.old):
             return Top(self.new, pie.accept(self))
         else:
-            return Top(self.old, pie.accept(self))
+            return Top(obj, pie.accept(self))
+
+
+class LimitedSubstitutionVisitor(PieVisitor):
+    def __init__(self, n: int, new: object, old: object):
+        self.n = n
+        self.new = new
+        self.old = old
+
+    def forBot(self) -> "Pie":
+        return Bot()
+
+    def forTop(self, obj: object, pie: "Pie") -> "Pie":
+        if self.n == 0:
+            return Top(obj, pie)
+        elif obj.equals(self.old):
+            return Top(self.new, pie.accept(self))
+        else:
+            return Top(obj, pie.accept(self))
 
 
 class Pie(ABC):
