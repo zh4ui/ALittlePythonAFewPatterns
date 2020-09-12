@@ -1,3 +1,6 @@
+"""
+"""
+
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -189,3 +192,6 @@ if __name__ == "__main__":
     import doctest
 
     doctest.testmod()
+
+    # Plus(Const(Integer(7)), Prod(Diff(Const(Integer(4), Const(Integer(3)))), Const(Integer(5))))
+    # Plus(Const(Empty().add(Integer(7)).add(Integer(5))), Prod(Diff(Const(Empty().add(Integer(4))), Const(Empty().add(Integer(3)))), Const(Empty().add(Integer(5)))))
