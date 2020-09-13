@@ -193,6 +193,9 @@ class Integer(object):
     def equals(self, i: "Integer") -> bool:
         return self.value == i.value
 
+    def intValue(self):
+        return self.value
+
 
 def whatPie(pie: Pie):
     print(pie.__class__.__name__, end="/")
