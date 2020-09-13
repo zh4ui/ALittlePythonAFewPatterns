@@ -6,7 +6,12 @@ True
 >>> Trans(CartesianPt(5,6), Circle(10)).accept(HasPt(CartesianPt(10,10)))
 True
 
->>> a = Trans(CartesianPt(12,2), Union(Square(10), Trans(CartesianPt(4,4), Circle(5))))
+>>> a = Trans(CartesianPt(3,7), Union(Square(10), Circle(10)))
+>>> a.accept(UnionHasPt(CartesianPt(13,17)))
+True
+
+>>> Union(Square(10), Circle(10)).accept(UnionHasPt(CartesianPt(10, 10)))
+True
 """
 
 from abc import ABC, abstractmethod
@@ -77,6 +82,9 @@ class HasPt(ShapeVisitor):
     def __init__(self, p: Point):
         self.p = p
 
+    def newHasPt(self, p: Point) -> ShapeVisitor:
+        return HasPt(p)
+
     def forCircle(self, radius: int) -> bool:
         return self.p.distanceToOrigin() <= radius
 
@@ -84,7 +92,18 @@ class HasPt(ShapeVisitor):
         return self.p.x <= side and self.p.y <= side
 
     def forTrans(self, q: Point, s: Shape) -> bool:
-        return s.accept(HasPt(self.p.minus(q)))
+        return s.accept(self.newHasPt(self.p.minus(q)))
+
+
+class UnionHasPt(HasPt, UnionVisitor):
+    def __init__(self, p: Point):
+        super().__init__(p)
+
+    def newHasPt(self, p: Point) -> ShapeVisitor:
+        return UnionHasPt(p)
+
+    def forUnion(self, s: Shape, t: Shape) -> bool:
+        return s.accept(self) or t.accept(self)
 
 
 if __name__ == "__main__":
